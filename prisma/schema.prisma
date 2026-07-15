@@ -13,6 +13,9 @@ model User {
   email    String  @unique
   password String
   role     String
+  profileImage String?
+  profileImageUrl String?
+  createdAt DateTime @default(now())
   // Remove announcements here if User no longer posts announcements
 }
 
@@ -35,12 +38,13 @@ model Admin {
 
 
 model Announcement {
-  id         Int      @id @default(autoincrement())
-  title      String
-  content    String
-  createdAt  DateTime @default(now())
-  lecturer   Lecturer @relation("LecturerAnnouncements", fields: [lecturerId], references: [id])
-  lecturerId Int
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  lecturerId  Int
+  createdAt   DateTime @default(now())
+
+  lecturer    Lecturer @relation("LecturerAnnouncements", fields: [lecturerId], references: [id])
 }
 
 model Book {
@@ -51,5 +55,29 @@ model Book {
   semester    String   // ✅ FIX HERE
   fileUrl     String
   lecturerId  Int
+  createdAt   DateTime @default(now())
+}
+
+
+model AssignmentSubmission {
+  id           Int      @id @default(autoincrement())
+
+  title        String
+  studentId    String
+
+  fileUrl      String
+  fileName     String
+
+  grade        String?
+  feedback     String?
+
+  submittedAt  DateTime @default(now())
+}
+
+model Assignment {
+  id          Int      @id @default(autoincrement())
+  title       String
+  studentId   String
+  fileUrl     String
   createdAt   DateTime @default(now())
 }

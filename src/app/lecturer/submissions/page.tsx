@@ -12,11 +12,13 @@ interface User {
 
 interface Submission {
   id: number;
-  studentName: string;
-  assignmentTitle: string;
+  title: string;
+  studentId: string;
   fileUrl: string;
+  fileName: string;
   grade?: string;
   feedback?: string;
+  submittedAt: string;
 }
 
 export default function ReviewSubmissions() {
@@ -25,121 +27,337 @@ export default function ReviewSubmissions() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
+
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
 
-      // Fetch submissions for this lecturer
-      fetchSubmissions(parsedUser.id);
+      fetchSubmissions();
     } else {
       router.push("/");
     }
   }, [router]);
 
-  const fetchSubmissions = async (lecturerId: number) => {
+
+  const fetchSubmissions = async () => {
     try {
-      const res = await fetch(`/api/lecturer/submissions?lecturerId=${lecturerId}`);
+      const res = await fetch("/api/lecturer/submissions");
+
       const data = await res.json();
+
       if (res.ok) {
         setSubmissions(data.submissions || []);
       } else {
-        console.error("Failed to fetch submissions:", data.error);
+        console.error(data.error);
       }
-    } catch (err) {
-      console.error("Server error", err);
+
+    } catch (error) {
+      console.error("Fetch error:", error);
     }
+
     setLoading(false);
   };
 
+
   if (!user || user.role !== "lecturer") {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-100 bg-gray-900">
-        <p>Access Denied</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-950 text-gray-100 px-4">
+        <div className="bg-gray-800 px-6 sm:px-8 py-6 rounded-2xl shadow-xl text-center w-full max-w-sm">
+          <h2 className="text-xl font-semibold mb-2">
+            Access Denied
+          </h2>
+
+          <p className="text-gray-400">
+            Only lecturers can view submissions.
+          </p>
+        </div>
       </div>
     );
   }
 
-  // Framer Motion variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-  };
 
   return (
     <motion.div
-      className="min-h-screen bg-gray-900 text-gray-100 px-4 sm:px-6 py-10"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
+      className="
+        min-h-screen
+        bg-gray-950
+        text-gray-100
+        px-3
+        sm:px-6
+        lg:px-8
+        py-6
+        sm:py-10
+        overflow-x-hidden
+      "
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      {/* Back Button */}
-      <motion.button
-        onClick={() => router.back()}
-        className="mb-6 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white font-medium shadow transition"
-        variants={itemVariants}
-      >
-        ← Back
-      </motion.button>
 
-      <motion.h1
-        className="text-2xl sm:text-3xl font-bold mb-6"
-        variants={itemVariants}
-      >
-        Review Submissions
-      </motion.h1>
+      <div className="max-w-6xl mx-auto w-full">
 
-      {loading ? (
-        <motion.p className="text-center mt-10" variants={itemVariants}>
-          Loading submissions...
-        </motion.p>
-      ) : submissions.length === 0 ? (
-        <motion.p className="text-center mt-10" variants={itemVariants}>
-          No submissions yet.
-        </motion.p>
-      ) : (
-        <motion.div
-          className="grid gap-6 sm:grid-cols-1 md:grid-cols-2"
-          variants={containerVariants}
+
+        <button
+          onClick={() => router.back()}
+          className="
+            mb-6
+            flex
+            items-center
+            gap-2
+            px-4
+            py-2.5
+            bg-gray-800
+            hover:bg-gray-700
+            rounded-xl
+            text-sm
+            font-medium
+            transition
+            shadow
+          "
         >
-          {submissions.map((submission) => (
-            <motion.div
-              key={submission.id}
-              className="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col gap-3"
-              variants={itemVariants}
-              whileHover={{ scale: 1.02 }}
-            >
-              <h3 className="text-xl font-semibold">{submission.assignmentTitle}</h3>
-              <p className="text-gray-300">Student: {submission.studentName}</p>
-              <a
-                href={submission.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:underline"
+          ← Back
+        </button>
+
+
+        <div className="mb-8">
+
+          <h1 className="
+            text-2xl
+            sm:text-3xl
+            lg:text-4xl
+            font-bold
+          ">
+            Assignment Submissions
+          </h1>
+
+
+          <p className="
+            text-gray-400
+            mt-2
+            text-sm
+            sm:text-base
+          ">
+            Review student assignments, download files, and provide feedback.
+          </p>
+
+        </div>
+
+
+
+        {loading ? (
+
+          <div className="flex justify-center py-16">
+
+            <div className="
+              bg-gray-800
+              px-6
+              py-5
+              rounded-2xl
+              shadow-xl
+              text-gray-300
+            ">
+              Loading submissions...
+            </div>
+
+          </div>
+
+
+        ) : submissions.length === 0 ? (
+
+          <div className="
+            bg-gray-800
+            rounded-2xl
+            p-6
+            sm:p-10
+            text-center
+            shadow-lg
+          ">
+
+            <h2 className="text-xl font-semibold">
+              No submissions yet
+            </h2>
+
+            <p className="text-gray-400 mt-2">
+              Student assignments will appear here once submitted.
+            </p>
+
+          </div>
+
+
+        ) : (
+
+          <div className="
+            grid
+            grid-cols-1
+            sm:grid-cols-1
+            md:grid-cols-2
+            xl:grid-cols-3
+            gap-4
+            sm:gap-6
+          ">
+
+            {submissions.map((submission)=>(
+
+              <motion.div
+                key={submission.id}
+                className="
+                  bg-gray-900
+                  border
+                  border-gray-800
+                  rounded-2xl
+                  p-4
+                  sm:p-6
+                  shadow-xl
+                  hover:border-blue-500
+                  transition
+                  w-full
+                  overflow-hidden
+                "
+                initial={{opacity:0,y:20}}
+                animate={{opacity:1,y:0}}
+                whileHover={{scale:1.02}}
               >
-                Download Submission
-              </a>
-              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mt-3 gap-2">
-                <span className="text-gray-200">
-                  Grade: {submission.grade || "Not graded"}
-                </span>
-                <button
-                  onClick={() => alert("Implement grade/feedback modal!")}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium shadow transition"
+
+
+                <div className="mb-5">
+
+                  <h2 className="
+                    text-lg
+                    sm:text-xl
+                    font-bold
+                    text-white
+                    mb-3
+                    break-words
+                  ">
+                    {submission.title}
+                  </h2>
+
+
+                  <div className="space-y-3 text-sm">
+
+                    <p className="text-gray-300 break-words">
+                      <span className="font-semibold text-white">
+                        Student ID:
+                      </span>{" "}
+                      {submission.studentId}
+                    </p>
+
+
+                    <p className="text-gray-300 break-all">
+
+                      <span className="font-semibold text-white">
+                        File:
+                      </span>{" "}
+
+                      {submission.fileName}
+
+                    </p>
+
+
+                    <p className="text-gray-400 text-xs sm:text-sm">
+                      Submitted:
+                      {" "}
+                      {new Date(
+                        submission.submittedAt
+                      ).toLocaleString()}
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+
+                <a
+                  href={submission.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+                    block
+                    text-center
+                    bg-blue-600
+                    hover:bg-blue-700
+                    text-white
+                    py-3
+                    rounded-xl
+                    font-medium
+                    transition
+                  "
                 >
-                  Grade & Feedback
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      )}
+                  Download Assignment
+                </a>
+
+
+
+
+                <div className="
+                  mt-6
+                  bg-gray-800
+                  rounded-xl
+                  p-4
+                ">
+
+
+                  <h3 className="font-semibold mb-3">
+                    Evaluation
+                  </h3>
+
+
+                  <p className="text-sm text-gray-300 mb-2 break-words">
+
+                    <span className="font-semibold">
+                      Grade:
+                    </span>{" "}
+
+                    {submission.grade || "Not graded"}
+
+                  </p>
+
+
+                  <p className="text-sm text-gray-300 break-words">
+
+                    <span className="font-semibold">
+                      Feedback:
+                    </span>{" "}
+
+                    {submission.feedback || "No feedback"}
+
+                  </p>
+
+
+
+                  <button
+                    onClick={() => alert("Grade modal coming next")}
+                    className="
+                      mt-4
+                      w-full
+                      bg-green-600
+                      hover:bg-green-700
+                      py-2.5
+                      rounded-xl
+                      font-medium
+                      transition
+                    "
+                  >
+                    Grade & Feedback
+                  </button>
+
+
+                </div>
+
+
+              </motion.div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
+
     </motion.div>
   );
 }

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion, Variants } from "framer-motion";
 
 /* ==========================
-   🎓 All Courses Data
+   🎓 ONLY COMPUTER SCIENCE
    ========================== */
 const courseData = {
   computing: {
@@ -13,80 +13,7 @@ const courseData = {
     description:
       "Covers programming, networking, operating systems, AI, databases, cybersecurity and more.",
     duration: "4 Years",
-    modules: [
-      "Year 1 Semester 1",
-      "Year 1 Semester 2",
-      "Year 2 Semester 1",
-      "Year 2 Semester 2",
-      "Year 3 Semester 1",
-      "Year 3 Semester 2",
-      "Year 4 Semester 1",
-      "Year 4 Semester 2",
-    ],
-  },
-  economics: {
-    title: "Bachelor of Arts in Economics (BA Econ)",
-    description:
-      "Focuses on economic principles, statistics, development economics and finance.",
-    duration: "4 Years",
-    modules: [
-      "Year 1 Semester 1",
-      "Year 1 Semester 2",
-      "Year 2 Semester 1",
-      "Year 2 Semester 2",
-      "Year 3 Semester 1",
-      "Year 3 Semester 2",
-      "Year 4 Semester 1",
-      "Year 4 Semester 2",
-    ],
-  },
-  "bachelor-of-accounting": {
-    title: "Bachelor of Accounting (BAcc)",
-    description:
-      "Accounting principles, financial reporting, taxation, auditing and management accounting.",
-    duration: "4 Years",
-    modules: [
-      "Year 1 Semester 1",
-      "Year 1 Semester 2",
-      "Year 2 Semester 1",
-      "Year 2 Semester 2",
-      "Year 3 Semester 1",
-      "Year 3 Semester 2",
-      "Year 4 Semester 1",
-      "Year 4 Semester 2",
-    ],
-  },
-  "bachelor-of-business-administration": {
-    title: "Bachelor of Business Administration (BBA)",
-    description:
-      "Management, marketing, entrepreneurship, human resources, and business law.",
-    duration: "4 Years",
-    modules: [
-      "Year 1 Semester 1",
-      "Year 1 Semester 2",
-      "Year 2 Semester 1",
-      "Year 2 Semester 2",
-      "Year 3 Semester 1",
-      "Year 3 Semester 2",
-      "Year 4 Semester 1",
-      "Year 4 Semester 2",
-    ],
-  },
-  "bachelor-of-arts-purchasing-supply": {
-    title: "Bachelor of Arts in Purchasing & Supply (BAPS)",
-    description:
-      "Procurement, supply chain management, logistics, inventory, and contract management.",
-    duration: "4 Years",
-    modules: [
-      "Year 1 Semester 1",
-      "Year 1 Semester 2",
-      "Year 2 Semester 1",
-      "Year 2 Semester 2",
-      "Year 3 Semester 1",
-      "Year 3 Semester 2",
-      "Year 4 Semester 1",
-      "Year 4 Semester 2",
-    ],
+    modules: ["Year 1 to Year 4"],
   },
 } as const;
 
@@ -110,9 +37,6 @@ const buttonVariants: Variants = {
   tap: { scale: 0.95 },
 };
 
-/* ==========================
-   🎨 Course Details Page
-   ========================== */
 export default function CourseDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -129,7 +53,9 @@ export default function CourseDetailsPage() {
         variants={pageVariants}
       >
         <motion.div className="text-center" variants={fadeUp}>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-4">❌ Course Not Found</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-4">
+            ❌ Course Not Found
+          </h1>
           <p className="text-gray-400 text-base sm:text-lg">
             This course does not exist.
           </p>
@@ -138,17 +64,6 @@ export default function CourseDetailsPage() {
     );
   }
 
-  // Group modules by year
-  const groupedModules: Record<string, string[]> = {};
-  course.modules.forEach((mod) => {
-    const yearMatch = mod.match(/Year (\d)/);
-    if (yearMatch) {
-      const year = `Year ${yearMatch[1]}`;
-      if (!groupedModules[year]) groupedModules[year] = [];
-      groupedModules[year].push(mod);
-    }
-  });
-
   return (
     <motion.main
       className="min-h-screen bg-gray-900 text-gray-100 px-4 sm:px-6 lg:px-8 py-8 sm:py-12"
@@ -156,72 +71,57 @@ export default function CourseDetailsPage() {
       animate="visible"
       variants={pageVariants}
     >
-      {/* Title & Description */}
+      {/* Title */}
       <motion.div
-        className="max-w-3xl sm:max-w-4xl mx-auto text-center mb-8 sm:mb-10"
+        className="max-w-3xl mx-auto text-center mb-10"
         variants={fadeUp}
       >
-        <motion.h1 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4" variants={fadeUp}>
+        <motion.h1 className="text-4xl font-bold mb-4" variants={fadeUp}>
           {course.title}
         </motion.h1>
-        <motion.p className="text-gray-400 text-sm sm:text-lg" variants={fadeUp}>
+
+        <motion.p className="text-gray-400" variants={fadeUp}>
           {course.description}
         </motion.p>
+
         <motion.div
-          className="mt-4 sm:mt-6 inline-block bg-gray-800 text-gray-300 px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium shadow-sm"
+          className="mt-6 inline-block bg-gray-800 text-gray-300 px-5 py-2 rounded-full text-sm"
           variants={fadeUp}
         >
           Duration: {course.duration}
         </motion.div>
       </motion.div>
 
-      {/* Modules */}
-      <motion.h2
-        className="text-xl sm:text-2xl font-semibold text-center mb-6 sm:mb-8 text-gray-200"
+      {/* SINGLE BOX */}
+      <motion.div
+        className="max-w-4xl mx-auto bg-gray-800 rounded-2xl shadow-lg p-8 text-center"
         variants={fadeUp}
       >
-        Choose a Semester to View Modules
-      </motion.h2>
+        <motion.h2
+          className="text-2xl font-bold mb-6"
+          variants={fadeUp}
+        >
+          Books (Year 1 to Year 4)
+        </motion.h2>
 
-      <motion.div className="max-w-4xl sm:max-w-5xl mx-auto space-y-6 sm:space-y-8">
-        {Object.entries(groupedModules).map(([year, semesters]) => (
-          <motion.div
-            key={year}
-            className="bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-6"
-            variants={fadeUp}
-          >
-            <motion.h3 className="text-lg sm:text-xl font-bold text-gray-100 mb-3" variants={fadeUp}>
-              {year}
-            </motion.h3>
-            <motion.div className="flex flex-wrap gap-3 sm:gap-4">
-              {semesters.map((semester, idx) => (
-                <motion.button
-                  key={semester}
-                  className="flex-1 sm:flex-auto min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 rounded-xl font-medium shadow-md transition text-sm sm:text-base"
-                  variants={buttonVariants}
-                  initial="hidden"
-                  animate="visible"
-                  whileHover="hover"
-                  whileTap="tap"
-                  onClick={() =>
-                    router.push(
-                      `/modules/${slug}/${year.toLowerCase().replace(/\s+/g, "-")}-semester-${idx + 1}`
-                    )
-                  }
-                >
-                  Semester {idx + 1}
-                </motion.button>
-              ))}
-            </motion.div>
-          </motion.div>
-        ))}
+        <motion.button
+          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-medium shadow-md"
+          variants={buttonVariants}
+          whileHover="hover"
+          whileTap="tap"
+          onClick={() =>
+            router.push(`/modules/${slug}/year-1-to-year-4`)
+          }
+        >
+          View All Books
+        </motion.button>
       </motion.div>
 
       {/* Back Button */}
-      <motion.div className="mt-8 sm:mt-12 text-center" variants={fadeUp}>
+      <motion.div className="mt-12 text-center" variants={fadeUp}>
         <motion.button
           onClick={() => router.push("/courses")}
-          className="inline-block bg-gray-700 hover:bg-gray-600 text-gray-100 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium shadow transition text-sm sm:text-base"
+          className="bg-gray-700 hover:bg-gray-600 text-gray-100 px-6 py-3 rounded-lg"
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"

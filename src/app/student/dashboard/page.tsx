@@ -4,11 +4,12 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, Variants } from "framer-motion";
+import { supabase } from "@/lib/supabase";
 
 interface User {
   name: string;
   role: "student" | "admin" | string;
-  email?: string; // added email support
+  email?: string;
 }
 
 export default function DashboardPage() {
@@ -17,7 +18,7 @@ export default function DashboardPage() {
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const router = useRouter();
 
-  // Load user and profile picture
+  // Load user + profile image from DB
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) return router.push("/");
@@ -25,11 +26,16 @@ export default function DashboardPage() {
     const parsedUser: User = JSON.parse(storedUser);
     setUser(parsedUser);
 
-    // Load profile pic linked to this email
-    if (parsedUser.email) {
-      const storedPic = localStorage.getItem(`profilePic_${parsedUser.email}`);
-      if (storedPic) setProfilePic(storedPic);
-    }
+    const loadProfileImage = async () => {
+      const res = await fetch(`/api/user?email=${parsedUser.email}`);
+      const data = await res.json();
+
+      if (data?.profileImageUrl) {
+        setProfilePic(data.profileImageUrl);
+      }
+    };
+
+    loadProfileImage();
   }, [router]);
 
   // Logout
@@ -41,17 +47,47 @@ export default function DashboardPage() {
     }, 1500);
   };
 
-  // Profile upload (unique per email)
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0] && user?.email) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        setProfilePic(result);
-        localStorage.setItem(`profilePic_${user.email}`, result); // save per user email
-      };
-      reader.readAsDataURL(e.target.files[0]);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0] || !user?.email) return;
+
+    const file = e.target.files[0];
+
+    const filePath = `${user.email}/profile-${Date.now()}.jpg`;
+
+    console.log("Uploading to Supabase:", filePath);
+
+    const { data, error } = await supabase.storage
+      .from("profile-pictures")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: true,
+      });
+
+    if (error) {
+      console.error("UPLOAD ERROR:", error.message);
+      alert("Upload failed: " + error.message);
+      return;
     }
+
+    console.log("UPLOAD SUCCESS:", data);
+
+    const { data: publicData } = supabase.storage
+      .from("profile-pictures")
+      .getPublicUrl(filePath);
+
+    // ✅ ONLY ADDITION (SAVE TO DATABASE)
+    await fetch("/api/user", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: user.email,
+        profileImageUrl: publicData.publicUrl,
+      }),
+    });
+
+    setProfilePic(publicData.publicUrl);
   };
 
   if (loggingOut) {
@@ -84,7 +120,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Framer Motion variants
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -110,14 +145,13 @@ export default function DashboardPage() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           Student Dashboard
         </h1>
-        <div className="mt-4 sm:mt-0">
-          <button
-            className="bg-red-500 hover:bg-red-600 px-5 py-2.5 rounded-xl font-medium shadow transition"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
-        </div>
+
+        <button
+          className="bg-red-500 hover:bg-red-600 px-5 py-2.5 rounded-xl font-medium shadow transition"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
       </header>
 
       {/* Welcome */}
@@ -129,7 +163,7 @@ export default function DashboardPage() {
         <p className="text-gray-400 mt-2">Here’s what you can do today</p>
       </section>
 
-      {/* Dashboard - 3 columns */}
+      {/* Dashboard */}
       <motion.section
         className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start"
         initial="hidden"
@@ -152,7 +186,7 @@ export default function DashboardPage() {
           />
         </motion.div>
 
-        {/* Middle - Profile */}
+        {/* Profile */}
         <motion.div
           className="hidden lg:flex bg-gray-800 p-6 rounded-2xl shadow-lg text-center border-2 border-dashed border-gray-600 justify-center"
           variants={itemVariants}
@@ -161,26 +195,28 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold mb-4">
               Upload Profile Picture
             </h3>
+
             <label className="cursor-pointer flex flex-col items-center">
               {profilePic ? (
                 <img
                   src={profilePic}
-                  alt="Profile Preview"
-                  className="w-32 h-32 rounded-full border-4 border-gray-500 shadow-lg object-cover mb-3"
+                  className="w-32 h-32 rounded-full border-4 border-gray-500 object-cover mb-3"
                 />
               ) : (
                 <div className="w-32 h-32 flex items-center justify-center rounded-full border-4 border-dashed border-gray-500 text-gray-400 mb-3">
                   📷
                 </div>
               )}
+
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
                 onChange={handleFileChange}
               />
-              <span className="mt-2 text-sm text-red-400 hover:text-red-300">
-                {profilePic ? "Change Picture" : "Click to Upload"}
+
+              <span className="mt-2 text-sm text-red-400">
+                Click to Upload
               </span>
             </label>
           </div>
@@ -191,7 +227,7 @@ export default function DashboardPage() {
           <DashboardCard
             href="/assignments"
             title="Assignments"
-            desc="Submit assignments and view due dates"
+            desc="Submit assignments"
             icon="📝"
           />
           <DashboardCard
@@ -206,7 +242,6 @@ export default function DashboardPage() {
   );
 }
 
-// Dashboard Card
 function DashboardCard({
   href,
   title,
@@ -221,13 +256,11 @@ function DashboardCard({
   return (
     <Link
       href={href}
-      className="group bg-gray-800 hover:bg-gray-700 rounded-2xl p-6 shadow-lg transition transform hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-red-400 block"
+      className="group bg-gray-800 hover:bg-gray-700 rounded-2xl p-6 shadow-lg transition transform hover:-translate-y-1 hover:shadow-2xl block"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex justify-between mb-4">
         <span className="text-3xl">{icon}</span>
-        <span className="text-sm text-gray-400 group-hover:text-gray-300 transition">
-          Go →
-        </span>
+        <span className="text-sm text-gray-400">Go →</span>
       </div>
       <h3 className="text-xl font-semibold mb-2">{title}</h3>
       <p className="text-gray-400">{desc}</p>

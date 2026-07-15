@@ -10,81 +10,77 @@ interface Props {
   };
 }
 
-export default async function SemesterBooksPage({ params }: Props) {
-  // ✅ normalize values (VERY IMPORTANT FIX)
-  const course = params.course.toLowerCase().trim();
-  const semester = params.semester.toLowerCase().trim();
+function normalize(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .trim();
+}
 
-  const books = await prisma.book.findMany({
-    where: {
-      course,
-      semester,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+export default async function SemesterBooksPage({ params }: Props) {
+  const course = normalize(params.course);
+  const semester = normalize(params.semester);
+
+  const books = await prisma.book.findMany();
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white p-8">
-      <div className="max-w-5xl mx-auto">
+    <main className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white px-6 py-10">
+      <div className="max-w-6xl mx-auto">
 
-        <h1 className="text-4xl font-bold mb-2">
-          Books for {course.replace(/-/g, " ")}
-        </h1>
+        {/* HEADER */}
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white">
+            Books for Computing in Science
+          </h1>
 
-        <h2 className="text-xl text-gray-400 mb-8">
-          {semester.replace(/-/g, " ")}
-        </h2>
+          <p className="text-white mt-3 text-lg">
+            Past Papers & Study Materials
+          </p>
 
-        {books.length === 0 ? (
-          <div className="bg-gray-800 p-6 rounded-xl text-center">
-            <p className="text-gray-400">
-              No books uploaded for this semester yet.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-6">
-            {books.map((book) => (
-              <div
-                key={book.id}
-                className="bg-gray-800 rounded-xl p-6 shadow-lg"
+          <p className="text-white mt-1 text-sm">
+            {params.semester.replace(/-/g, " ")}
+          </p>
+        </div>
+
+        {/* BOOKS */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-6">
+          {books.map((book) => (
+            <div
+              key={book.id}
+              className="book-card bg-gray-900/60 border border-gray-800 rounded-2xl p-6"
+            >
+              <h3 className="text-xl font-bold text-white">
+                {book.title}
+              </h3>
+
+              <p className="text-white text-sm mt-2">
+                👨‍🏫 {book.lecturerId}
+              </p>
+
+              {book.description && (
+                <p className="text-white mt-3 text-sm">
+                  {book.description}
+                </p>
+              )}
+
+              <a
+                href={book.fileUrl}
+                target="_blank"
+                className="block mt-4 bg-blue-600 text-center py-2 rounded-xl text-white"
               >
-                <h3 className="text-2xl font-semibold">
-                  {book.title}
-                </h3>
+                Download PDF
+              </a>
+            </div>
+          ))}
+        </div>
 
-                {"author" in book && (
-                  <p className="text-gray-400 mt-2">
-                    Author: {(book as any).author}
-                  </p>
-                )}
+        {/* BACK */}
+        <div className="mt-12 text-center">
+          <Link href="/courses" className="text-white">
+            ← Back to Courses
+          </Link>
+        </div>
 
-                {book.description && (
-                  <p className="text-gray-300 mt-3">
-                    {book.description}
-                  </p>
-                )}
-
-                <a
-                  href={book.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block mt-5 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-medium"
-                >
-                  Download PDF
-                </a>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <Link
-          href="/courses"
-          className="inline-block mt-10 bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg"
-        >
-          ← Back
-        </Link>
       </div>
     </main>
   );

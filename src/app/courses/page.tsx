@@ -19,30 +19,6 @@ const coursesData: Course[] = [
     brief: "A computing programme covering programming, networks, OS, AI and more.",
     duration: "4 Years",
   },
-  {
-    slug: "economics",
-    title: "Bachelor of Arts Economics (BA Econ)",
-    brief: "Economics principles, statistics, development economics and finance.",
-    duration: "4 Years",
-  },
-  {
-    slug: "accounting",
-    title: "Bachelor of Accounting (BAC)",
-    brief: "Financial, management accounting, auditing, and taxation modules.",
-    duration: "4 Years",
-  },
-  {
-    slug: "business-administration",
-    title: "Bachelor of Business Administration (BBA)",
-    brief: "Management, marketing, finance, operations & strategic business skills.",
-    duration: "4 Years",
-  },
-  {
-    slug: "purchasing-supply",
-    title: "Bachelor of Arts Purchasing & Supply (BA PS)",
-    brief: "Procurement, supply chain, logistics and supply management.",
-    duration: "4 Years",
-  },
 ];
 
 // Framer Motion Variants
@@ -80,7 +56,6 @@ export default function CoursesPage() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        {/* Use a normal button for router */}
         <button
           onClick={() => router.push("/student/dashboard")}
           className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow transition"
