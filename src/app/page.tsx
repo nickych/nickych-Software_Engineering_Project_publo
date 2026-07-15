@@ -13,6 +13,7 @@ interface User {
 }
 
 export default function LoginPage() {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -21,30 +22,38 @@ export default function LoginPage() {
   const router = useRouter();
 
 
+
   useEffect(() => {
+
     const storedUser = localStorage.getItem("user");
     const storedKeepLoggedIn =
       localStorage.getItem("keepLoggedIn") === "true";
 
+
     if (storedKeepLoggedIn && storedUser) {
+
       try {
 
         const user: User = JSON.parse(storedUser);
 
-        switch (user.role) {
+
+        switch(user.role){
 
           case "admin":
             router.push("/admin/dashboard");
             break;
 
+
           case "lecturer":
             router.push("/lecturer/dashboard");
             break;
+
 
           default:
             router.push("/student/dashboard");
 
         }
+
 
       } catch {
 
@@ -52,9 +61,13 @@ export default function LoginPage() {
         localStorage.removeItem("keepLoggedIn");
 
       }
+
     }
 
+
   }, [router]);
+
+
 
 
 
@@ -65,28 +78,31 @@ export default function LoginPage() {
 
     try {
 
+
       const res = await fetch("/api/auth/login", {
 
-        method: "POST",
+        method:"POST",
 
-        headers: {
-          "Content-Type": "application/json"
+        headers:{
+          "Content-Type":"application/json"
         },
 
-        body: JSON.stringify({
+        body:JSON.stringify({
           email,
           password
-        }),
+        })
 
       });
 
 
 
-      if (!res.ok) {
+      if(!res.ok){
 
         const data = await res.json();
 
-        alert(`❌ ${data.error || "Login failed"}`);
+        alert(
+          `❌ ${data.error || "Login failed"}`
+        );
 
         return;
 
@@ -96,7 +112,7 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      const user: User = data.user;
+      const user:User = data.user;
 
 
 
@@ -113,7 +129,9 @@ export default function LoginPage() {
 
 
 
-      switch (user.role) {
+
+      switch(user.role){
+
 
         case "admin":
           router.push("/admin/dashboard");
@@ -128,25 +146,31 @@ export default function LoginPage() {
         default:
           router.push("/student/dashboard");
 
+
       }
 
 
 
-    } catch (err) {
 
-      console.error("Login error:", err);
+    }catch(error){
+
+      console.error(error);
 
       alert("Something went wrong");
 
     }
 
+
   };
+
 
 
 
   const showSignup =
     !email.endsWith("@cavendish.co.zm") &&
     email !== "name@gmail.com";
+
+
 
 
 
@@ -185,17 +209,22 @@ export default function LoginPage() {
       >
 
         <ReactTyped
+
           strings={[
             "Welcome To",
             "Cuz E-Learning"
           ]}
+
           typeSpeed={70}
           backSpeed={50}
           loop
           showCursor
+
         />
 
       </h1>
+
+
 
 
 
@@ -213,23 +242,37 @@ export default function LoginPage() {
       >
 
 
-        <div className="hidden md:block w-1/2">
+
+        <div
+          className="
+            hidden
+            md:block
+            w-1/2
+          "
+        >
 
           <img
+
             src="/pics/cuz.jpg"
+
             alt="Login background"
+
             className="
               h-full
               w-full
               object-cover
             "
+
           />
 
         </div>
 
 
 
+
+
         <div
+
           className="
             w-full
             md:w-1/2
@@ -239,10 +282,13 @@ export default function LoginPage() {
             justify-center
             text-gray-100
           "
+
         >
 
 
+
           <div
+
             className="
               flex
               space-x-8
@@ -250,43 +296,56 @@ export default function LoginPage() {
               text-lg
               font-semibold
             "
+
           >
 
             <button
+
               className="
                 text-white
                 border-b-2
                 border-blue-500
                 pb-2
               "
+
             >
+
               Sign In
+
             </button>
+
 
 
             {showSignup && (
 
               <Link
+
                 href="/signup"
+
                 className="
                   text-gray-400
                   hover:text-white
                 "
+
               >
+
                 Sign Up
+
               </Link>
 
             )}
+
 
           </div>          <form
             onSubmit={handleLogin}
             className="space-y-6"
           >
 
+
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e)=>setEmail(e.target.value)}
               placeholder="Your email"
               required
               className="
@@ -303,12 +362,12 @@ export default function LoginPage() {
 
 
 
-            <div className="relative">
+            <div>
 
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e)=>setPassword(e.target.value)}
                 placeholder="Your password"
                 required
                 className="
@@ -320,26 +379,40 @@ export default function LoginPage() {
                   outline-none
                   py-2
                   text-sm
-                  pr-10
                 "
               />
 
 
-              <button
-                type="button"
-                onClick={() =>
-                  setShowPassword(!showPassword)
-                }
+              <label
                 className="
-                  absolute
-                  right-0
-                  top-1
+                  flex
+                  items-center
+                  gap-2
+                  mt-3
+                  text-xs
                   text-gray-400
-                  hover:text-white
+                  cursor-pointer
                 "
               >
-                {showPassword ? "🙈" : "👁"}
-              </button>
+
+                <input
+                  type="checkbox"
+                  checked={showPassword}
+                  onChange={(e)=>
+                    setShowPassword(e.target.checked)
+                  }
+                  className="
+                    accent-blue-500
+                  "
+                />
+
+
+                <span>
+                  Show password
+                </span>
+
+
+              </label>
 
 
             </div>
@@ -369,16 +442,19 @@ export default function LoginPage() {
                   type="checkbox"
                   className="accent-blue-500"
                   checked={keepLoggedIn}
-                  onChange={(e) =>
+                  onChange={(e)=>
                     setKeepLoggedIn(e.target.checked)
                   }
                 />
+
 
                 <span>
                   Keep me logged in
                 </span>
 
+
               </label>
+
 
 
 
@@ -413,7 +489,9 @@ export default function LoginPage() {
                 transition
               "
             >
+
               SIGN IN
+
             </button>
 
 
@@ -421,7 +499,7 @@ export default function LoginPage() {
 
 
             <a
-              href="https://www.cavendishza.org/"
+              href="https://www.cavendish.co.zm/"
               target="_blank"
               rel="noopener noreferrer"
               className="
@@ -441,8 +519,11 @@ export default function LoginPage() {
                 transition
               "
             >
+
               VISIT CAVENDISH WEBSITE
+
             </a>
+
 
 
           </form>
@@ -450,9 +531,6 @@ export default function LoginPage() {
 
 
 
-
-
-          {/* Fixed Next.js routes for Netlify deployment */}
 
           <div
             className="
@@ -464,6 +542,7 @@ export default function LoginPage() {
               mt-8
             "
           >
+
 
             <Link
               href="/privacy"
@@ -512,4 +591,5 @@ export default function LoginPage() {
     </main>
 
   );
+
 }
