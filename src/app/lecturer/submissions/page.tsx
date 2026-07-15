@@ -16,8 +16,6 @@ interface Submission {
   studentId: string;
   fileUrl: string;
   fileName: string;
-  grade?: string;
-  feedback?: string;
   submittedAt: string;
 }
 
@@ -123,23 +121,27 @@ export default function ReviewSubmissions() {
 
         <div className="mb-8">
 
-          <h1 className="
-            text-2xl
-            sm:text-3xl
-            lg:text-4xl
-            font-bold
-          ">
+          <h1
+            className="
+              text-2xl
+              sm:text-3xl
+              lg:text-4xl
+              font-bold
+            "
+          >
             Assignment Submissions
           </h1>
 
 
-          <p className="
-            text-gray-400
-            mt-2
-            text-sm
-            sm:text-base
-          ">
-            Review student assignments, download files, and provide feedback.
+          <p
+            className="
+              text-gray-400
+              mt-2
+              text-sm
+              sm:text-base
+            "
+          >
+            Review student assignment submissions and download uploaded files.
           </p>
 
         </div>
@@ -150,14 +152,16 @@ export default function ReviewSubmissions() {
 
           <div className="flex justify-center py-16">
 
-            <div className="
-              bg-gray-800
-              px-6
-              py-5
-              rounded-2xl
-              shadow-xl
-              text-gray-300
-            ">
+            <div
+              className="
+                bg-gray-800
+                px-6
+                py-5
+                rounded-2xl
+                shadow-xl
+                text-gray-300
+              "
+            >
               Loading submissions...
             </div>
 
@@ -166,14 +170,16 @@ export default function ReviewSubmissions() {
 
         ) : submissions.length === 0 ? (
 
-          <div className="
-            bg-gray-800
-            rounded-2xl
-            p-6
-            sm:p-10
-            text-center
-            shadow-lg
-          ">
+          <div
+            className="
+              bg-gray-800
+              rounded-2xl
+              p-6
+              sm:p-10
+              text-center
+              shadow-lg
+            "
+          >
 
             <h2 className="text-xl font-semibold">
               No submissions yet
@@ -188,17 +194,18 @@ export default function ReviewSubmissions() {
 
         ) : (
 
-          <div className="
-            grid
-            grid-cols-1
-            sm:grid-cols-1
-            md:grid-cols-2
-            xl:grid-cols-3
-            gap-4
-            sm:gap-6
-          ">
+          <div
+            className="
+              grid
+              grid-cols-1
+              md:grid-cols-2
+              xl:grid-cols-3
+              gap-4
+              sm:gap-6
+            "
+          >
 
-            {submissions.map((submission)=>(
+            {submissions.map((submission) => (
 
               <motion.div
                 key={submission.id}
@@ -215,33 +222,47 @@ export default function ReviewSubmissions() {
                   w-full
                   overflow-hidden
                 "
-                initial={{opacity:0,y:20}}
-                animate={{opacity:1,y:0}}
-                whileHover={{scale:1.02}}
+                initial={{
+                  opacity: 0,
+                  y: 20
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0
+                }}
+                whileHover={{
+                  scale: 1.02
+                }}
               >
 
 
                 <div className="mb-5">
 
-                  <h2 className="
-                    text-lg
-                    sm:text-xl
-                    font-bold
-                    text-white
-                    mb-3
-                    break-words
-                  ">
+                  <h2
+                    className="
+                      text-lg
+                      sm:text-xl
+                      font-bold
+                      text-white
+                      mb-3
+                      break-words
+                    "
+                  >
                     {submission.title}
                   </h2>
 
 
                   <div className="space-y-3 text-sm">
 
+
                     <p className="text-gray-300 break-words">
+
                       <span className="font-semibold text-white">
                         Student ID:
                       </span>{" "}
+
                       {submission.studentId}
+
                     </p>
 
 
@@ -257,12 +278,15 @@ export default function ReviewSubmissions() {
 
 
                     <p className="text-gray-400 text-xs sm:text-sm">
+
                       Submitted:
                       {" "}
                       {new Date(
                         submission.submittedAt
                       ).toLocaleString()}
+
                     </p>
+
 
                   </div>
 
@@ -275,77 +299,24 @@ export default function ReviewSubmissions() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="
-                    block
-                    text-center
+                    flex
+                    items-center
+                    justify-center
+                    w-full
                     bg-blue-600
                     hover:bg-blue-700
                     text-white
                     py-3
                     rounded-xl
                     font-medium
-                    transition
+                    transition-all
+                    duration-200
+                    shadow-md
+                    hover:shadow-lg
                   "
                 >
-                  Download Assignment
+                  📥 Download Assignment
                 </a>
-
-
-
-
-                <div className="
-                  mt-6
-                  bg-gray-800
-                  rounded-xl
-                  p-4
-                ">
-
-
-                  <h3 className="font-semibold mb-3">
-                    Evaluation
-                  </h3>
-
-
-                  <p className="text-sm text-gray-300 mb-2 break-words">
-
-                    <span className="font-semibold">
-                      Grade:
-                    </span>{" "}
-
-                    {submission.grade || "Not graded"}
-
-                  </p>
-
-
-                  <p className="text-sm text-gray-300 break-words">
-
-                    <span className="font-semibold">
-                      Feedback:
-                    </span>{" "}
-
-                    {submission.feedback || "No feedback"}
-
-                  </p>
-
-
-
-                  <button
-                    onClick={() => alert("Grade modal coming next")}
-                    className="
-                      mt-4
-                      w-full
-                      bg-green-600
-                      hover:bg-green-700
-                      py-2.5
-                      rounded-xl
-                      font-medium
-                      transition
-                    "
-                  >
-                    Grade & Feedback
-                  </button>
-
-
-                </div>
 
 
               </motion.div>
