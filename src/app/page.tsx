@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+
   const router = useRouter();
 
 
@@ -27,9 +28,11 @@ export default function LoginPage() {
 
     if (storedKeepLoggedIn && storedUser) {
       try {
+
         const user: User = JSON.parse(storedUser);
 
         switch (user.role) {
+
           case "admin":
             router.push("/admin/dashboard");
             break;
@@ -40,31 +43,43 @@ export default function LoginPage() {
 
           default:
             router.push("/student/dashboard");
+
         }
 
       } catch {
+
         localStorage.removeItem("user");
         localStorage.removeItem("keepLoggedIn");
+
       }
     }
+
   }, [router]);
 
 
+
   const handleLogin = async (e: React.FormEvent) => {
+
     e.preventDefault();
+
 
     try {
 
       const res = await fetch("/api/auth/login", {
+
         method: "POST",
+
         headers: {
           "Content-Type": "application/json"
         },
+
         body: JSON.stringify({
           email,
           password
         }),
+
       });
+
 
 
       if (!res.ok) {
@@ -74,12 +89,15 @@ export default function LoginPage() {
         alert(`❌ ${data.error || "Login failed"}`);
 
         return;
+
       }
+
 
 
       const data = await res.json();
 
       const user: User = data.user;
+
 
 
       localStorage.setItem(
@@ -94,20 +112,24 @@ export default function LoginPage() {
       );
 
 
+
       switch (user.role) {
 
         case "admin":
           router.push("/admin/dashboard");
           break;
 
+
         case "lecturer":
           router.push("/lecturer/dashboard");
           break;
+
 
         default:
           router.push("/student/dashboard");
 
       }
+
 
 
     } catch (err) {
@@ -117,12 +139,15 @@ export default function LoginPage() {
       alert("Something went wrong");
 
     }
+
   };
+
 
 
   const showSignup =
     !email.endsWith("@cavendish.co.zm") &&
     email !== "name@gmail.com";
+
 
 
   return (
@@ -188,13 +213,7 @@ export default function LoginPage() {
       >
 
 
-        <div
-          className="
-            hidden
-            md:block
-            w-1/2
-          "
-        >
+        <div className="hidden md:block w-1/2">
 
           <img
             src="/pics/cuz.jpg"
@@ -259,23 +278,15 @@ export default function LoginPage() {
 
             )}
 
-          </div>
-
-
-
-
-          <form
+          </div>          <form
             onSubmit={handleLogin}
-            className="
-              space-y-6
-            "
+            className="space-y-6"
           >
-
 
             <input
               type="email"
               value={email}
-              onChange={(e)=>setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Your email"
               required
               className="
@@ -292,17 +303,12 @@ export default function LoginPage() {
 
 
 
-
-            <div
-              className="
-                relative
-              "
-            >
+            <div className="relative">
 
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e)=>setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Your password"
                 required
                 className="
@@ -330,12 +336,9 @@ export default function LoginPage() {
                   top-1
                   text-gray-400
                   hover:text-white
-                  text-sm
                 "
               >
-
                 {showPassword ? "🙈" : "👁"}
-
               </button>
 
 
@@ -366,7 +369,7 @@ export default function LoginPage() {
                   type="checkbox"
                   className="accent-blue-500"
                   checked={keepLoggedIn}
-                  onChange={(e)=>
+                  onChange={(e) =>
                     setKeepLoggedIn(e.target.checked)
                   }
                 />
@@ -376,6 +379,7 @@ export default function LoginPage() {
                 </span>
 
               </label>
+
 
 
               <Link
@@ -417,7 +421,7 @@ export default function LoginPage() {
 
 
             <a
-              href="https://www.cavendish.co.zm/"
+              href="https://www.cavendishza.org/"
               target="_blank"
               rel="noopener noreferrer"
               className="
@@ -441,12 +445,14 @@ export default function LoginPage() {
             </a>
 
 
-
           </form>
 
 
 
 
+
+
+          {/* Fixed Next.js routes for Netlify deployment */}
 
           <div
             className="
@@ -459,17 +465,40 @@ export default function LoginPage() {
             "
           >
 
-            <Link href="/privacy" className="hover:text-white">
+            <Link
+              href="/privacy"
+              className="
+                hover:text-white
+                transition
+              "
+            >
               Privacy
             </Link>
 
-            <Link href="/terms" className="hover:text-white">
+
+
+            <Link
+              href="/terms"
+              className="
+                hover:text-white
+                transition
+              "
+            >
               Terms
             </Link>
 
-            <Link href="/about" className="hover:text-white">
+
+
+            <Link
+              href="/about"
+              className="
+                hover:text-white
+                transition
+              "
+            >
               About
             </Link>
+
 
           </div>
 
