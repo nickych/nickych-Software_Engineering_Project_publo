@@ -4,166 +4,580 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
-interface Grade {
+interface Result {
   id: number;
-  course: string;
-  assignment: string;
-  grade: string;
+  title: string;
+  description?: string;
+  fileName: string;
+  fileUrl: string;
+  createdAt: string;
 }
 
-interface Progress {
-  course: string;
-  completed: number;
-  total: number;
-}
 
 interface User {
   name: string;
   email: string;
   role: string;
-  course: string;
 }
 
-export default function GradesPage() {
+
+export default function StudentResultsPage() {
+
   const router = useRouter();
-  const [grades, setGrades] = useState<Grade[]>([]);
-  const [progress, setProgress] = useState<Progress[]>([]);
+
+  const [results, setResults] = useState<Result[]>([]);
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) return router.push("/login");
 
-    const parsedUser: User = JSON.parse(storedUser);
+    const storedUser =
+      localStorage.getItem("user");
+
+
+    if (!storedUser) {
+
+      router.push("/login");
+
+      return;
+
+    }
+
+
+    const parsedUser =
+      JSON.parse(storedUser);
+
+
     setUser(parsedUser);
 
-    // Example data
-    const allGrades: Grade[] = [
-      { id: 1, course: "BSc Computing", assignment: "Assignment 1", grade: "85%" },
-      { id: 2, course: "BSc Computing", assignment: "Assignment 2", grade: "90%" },
-      { id: 3, course: "BA Economics", assignment: "Essay 1", grade: "B+" },
-    ];
 
-    const allProgress: Progress[] = [
-      { course: "BSc Computing", completed: 2, total: 4 },
-      { course: "BA Economics", completed: 1, total: 3 },
-    ];
+    fetchResults();
 
-    // Filter by student's course
-    setGrades(allGrades.filter((g) => g.course === parsedUser.course));
-    setProgress(allProgress.filter((p) => p.course === parsedUser.course));
+
   }, [router]);
 
+
+
+
+
+
+  const fetchResults = async () => {
+
+    try {
+
+      const res =
+        await fetch("/api/student/results");
+
+
+      const data =
+        await res.json();
+
+
+
+      if(res.ok){
+
+        setResults(
+          data.results || []
+        );
+
+      }
+
+
+    } catch(error){
+
+      console.error(error);
+
+    }
+
+    finally{
+
+      setLoading(false);
+
+    }
+
+  };
+
+
+
+
+
+
   return (
-    <main className="min-h-screen bg-gray-900 text-gray-100 px-4 sm:px-6 lg:px-8 py-8">
-      {/* Back Button */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-6"
+
+    <main
+      className="
+        min-h-screen
+        bg-gradient-to-br
+        from-gray-950
+        via-gray-900
+        to-gray-950
+        text-gray-100
+        px-3
+        sm:px-6
+        lg:px-10
+        py-6
+        sm:py-8
+      "
+    >
+
+
+      <div
+        className="
+          max-w-6xl
+          mx-auto
+        "
       >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => router.push("/student/dashboard")}
-          className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow"
+
+
+
+        <button
+
+          onClick={() =>
+            router.push("/student/dashboard")
+          }
+
+          className="
+            mb-6
+            flex
+            items-center
+            gap-2
+            bg-gray-800
+            hover:bg-gray-700
+            px-4
+            py-2
+            rounded-xl
+            text-sm
+            transition
+            shadow-lg
+          "
+
         >
+
           ← Back to Dashboard
-        </motion.button>
-      </motion.div>
 
-      <motion.h1
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-3xl font-bold text-center mb-8"
-      >
-        📊 Grades & Progress
-      </motion.h1>
+        </button>
 
-      {/* Grades Table */}
-      <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="max-w-4xl mx-auto mb-12"
-      >
-        <h2 className="text-2xl font-semibold mb-4">Your Grades</h2>
-        <div className="overflow-x-auto">
-          <motion.table
-            whileHover={{ scale: 1.01 }}
-            className="min-w-full bg-gray-800 rounded-xl overflow-hidden"
+
+
+
+
+
+
+        <motion.div
+
+          initial={{
+            opacity:0,
+            y:-20
+          }}
+
+          animate={{
+            opacity:1,
+            y:0
+          }}
+
+          className="
+            mb-8
+            bg-gradient-to-r
+            from-blue-600
+            to-cyan-500
+            rounded-3xl
+            p-5
+            sm:p-8
+            shadow-xl
+          "
+
+        >
+
+
+          <h1
+            className="
+              text-2xl
+              sm:text-3xl
+              lg:text-4xl
+              font-bold
+            "
           >
-            <thead>
-              <tr className="bg-gray-700 text-left">
-                <th className="px-6 py-3 text-sm font-medium">Course</th>
-                <th className="px-6 py-3 text-sm font-medium">Assignment</th>
-                <th className="px-6 py-3 text-sm font-medium">Grade</th>
-              </tr>
-            </thead>
-            <tbody>
-              {grades.map((g) => (
-                <motion.tr
-                  key={g.id}
-                  whileHover={{ scale: 1.02 }}
-                  className="border-b border-gray-700 hover:bg-gray-700"
-                >
-                  <td className="px-6 py-3">{g.course}</td>
-                  <td className="px-6 py-3">{g.assignment}</td>
-                  <td className="px-6 py-3">{g.grade}</td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </motion.table>
-          {grades.length === 0 && (
-            <p className="text-center text-gray-400 mt-4">No grades posted yet.</p>
-          )}
-        </div>
-      </motion.section>
 
-      {/* Progress Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        className="max-w-4xl mx-auto"
-      >
-        <h2 className="text-2xl font-semibold mb-4">Progress</h2>
-        <div className="space-y-4">
-          {progress.map((p) => {
-            const percent = Math.round((p.completed / p.total) * 100);
-            return (
+            📄 Results Centre
+
+          </h1>
+
+
+
+          <p
+            className="
+              mt-3
+              text-blue-100
+              text-sm
+              sm:text-base
+              max-w-xl
+            "
+          >
+
+            View and download your officially
+            published academic results from your lecturers.
+
+          </p>
+
+
+
+        </motion.div>
+
+
+
+
+
+
+
+        {loading ? (
+
+          <div
+            className="
+              bg-gray-900
+              border
+              border-gray-800
+              rounded-2xl
+              p-8
+              text-center
+            "
+          >
+
+            <p className="text-gray-400">
+
+              Loading results...
+
+            </p>
+
+          </div>
+
+
+
+        ) : results.length === 0 ? (
+
+
+          <div
+            className="
+              bg-gray-900
+              border
+              border-gray-800
+              rounded-2xl
+              p-8
+              sm:p-10
+              text-center
+              shadow-xl
+            "
+          >
+
+            <div className="text-5xl mb-4">
+              📭
+            </div>
+
+
+            <h2
+              className="
+                text-lg
+                sm:text-xl
+                font-semibold
+                mb-2
+              "
+            >
+
+              No Results Available
+
+            </h2>
+
+
+            <p
+              className="
+                text-gray-400
+                text-sm
+              "
+            >
+
+              Your lecturer has not published
+              any results yet.
+
+            </p>
+
+
+          </div>        ) : (
+
+
+
+          <div
+            className="
+              grid
+              grid-cols-1
+              sm:grid-cols-1
+              lg:grid-cols-2
+              gap-4
+              sm:gap-6
+            "
+          >
+
+
+
+            {results.map((result)=>(
+
+
               <motion.div
-                key={p.course}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                whileHover={{ scale: 1.02 }}
-                className="bg-gray-800 rounded-xl p-4 shadow"
+
+                key={result.id}
+
+
+                initial={{
+                  opacity:0,
+                  y:25
+                }}
+
+
+                animate={{
+                  opacity:1,
+                  y:0
+                }}
+
+
+                whileHover={{
+                  y:-5
+                }}
+
+
+                className="
+                  bg-gray-900
+                  border
+                  border-gray-800
+                  rounded-3xl
+                  p-4
+                  sm:p-6
+                  shadow-xl
+                  transition
+                  overflow-hidden
+                "
+
               >
-                <div className="flex justify-between mb-2">
-                  <span className="font-medium">{p.course}</span>
-                  <span className="text-sm text-gray-400">
-                    {p.completed}/{p.total} assignments completed
-                  </span>
+
+
+
+
+
+                <div
+                  className="
+                    flex
+                    items-start
+                    justify-between
+                    mb-5
+                  "
+                >
+
+
+                  <div
+                    className="
+                      w-full
+                    "
+                  >
+
+                    <h2
+                      className="
+                        text-lg
+                        sm:text-xl
+                        font-bold
+                        text-white
+                        break-words
+                      "
+                    >
+
+                      📄 {result.title}
+
+                    </h2>
+
+
+                    <p
+                      className="
+                        text-xs
+                        sm:text-sm
+                        text-gray-500
+                        mt-2
+                      "
+                    >
+
+                      Published:
+                      {" "}
+                      {new Date(
+                        result.createdAt
+                      ).toLocaleDateString()}
+
+                    </p>
+
+
+                  </div>
+
+
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${percent}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="bg-blue-500 h-4 rounded-full"
-                  />
+
+
+
+
+
+
+
+                <div
+                  className="
+                    bg-gray-800
+                    rounded-xl
+                    p-4
+                    mb-5
+                  "
+                >
+
+
+                  <p
+                    className="
+                      text-gray-300
+                      text-sm
+                      leading-relaxed
+                      mb-4
+                    "
+                  >
+
+                    {result.description ||
+                    "No description provided."}
+
+                  </p>
+
+
+
+                  <div
+                    className="
+                      flex
+                      items-start
+                      gap-2
+                      text-sm
+                      text-blue-400
+                    "
+                  >
+
+                    <span>
+                      📎
+                    </span>
+
+
+                    <span
+                      className="
+                        break-all
+                      "
+                    >
+
+                      {result.fileName}
+
+                    </span>
+
+
+                  </div>
+
+
+
                 </div>
+
+
+
+
+
+
+
+
+                <div
+                  className="
+                    grid
+                    grid-cols-1
+                    sm:grid-cols-2
+                    gap-3
+                  "
+                >
+
+
+                  <a
+
+                    href={result.fileUrl}
+
+                    target="_blank"
+
+                    rel="noopener noreferrer"
+
+                    className="
+                      text-center
+                      bg-blue-600
+                      hover:bg-blue-700
+                      py-3
+                      rounded-xl
+                      font-medium
+                      text-sm
+                      sm:text-base
+                      transition
+                    "
+
+                  >
+
+                    👁 View File
+
+                  </a>
+
+
+
+
+
+                  <a
+
+                    href={result.fileUrl}
+
+                    download
+
+                    className="
+                      text-center
+                      bg-green-600
+                      hover:bg-green-700
+                      py-3
+                      rounded-xl
+                      font-medium
+                      text-sm
+                      sm:text-base
+                      transition
+                    "
+
+                  >
+
+                    ⬇ Download
+
+                  </a>
+
+
+
+                </div>
+
+
+
+
+
               </motion.div>
-            );
-          })}
-          {progress.length === 0 && (
-            <p className="text-center text-gray-400">No progress data available yet.</p>
-          )}
-        </div>
-      </motion.section>
+
+
+            ))}
+
+
+          </div>
+
+
+        )}
+
+
+
+      </div>
+
+
+
     </main>
+
   );
+
 }

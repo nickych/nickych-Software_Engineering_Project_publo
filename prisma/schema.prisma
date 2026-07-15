@@ -81,3 +81,12 @@ model Assignment {
   fileUrl     String
   createdAt   DateTime @default(now())
 }
+
+model Result {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  fileName    String
+  fileUrl     String
+  createdAt   DateTime @default(now())
+}
