@@ -1,153 +1,84 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-
-export default function PublishResultsPage() {
-
-  const router = useRouter();
-
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-
-  const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState("");
+import { Upload, FileSpreadsheet, BookOpen, GraduationCap } from "lucide-react";
 
 
+interface Module {
 
-  const handleSubmit = async (
-    e: React.FormEvent
-  ) => {
+  id:number;
+  name:string;
+  year:string;
+  semester:string;
 
-    e.preventDefault();
+}
 
 
-    if (!file) {
 
-      setMessage("Please select a file.");
 
-      return;
+export default function UploadResultsPage(){
+
+
+  const [year,setYear] = useState("");
+
+  const [semester,setSemester] = useState("");
+
+  const [module,setModule] = useState("");
+
+  const [assessment,setAssessment] = useState("");
+
+  const [file,setFile] = useState<File|null>(null);
+
+
+  const [modules,setModules] = useState<Module[]>([]);
+
+  const [loading,setLoading] = useState(false);
+
+
+  const [message,setMessage] = useState("");
+
+  const [error,setError] = useState("");
+
+
+
+
+
+
+
+  useEffect(()=>{
+
+    fetchModules();
+
+  },[]);
+
+
+
+
+
+
+
+  const fetchModules = async()=>{
+
+
+    try{
+
+
+      const res = await fetch("/api/modules");
+
+      const data = await res.json();
+
+
+      setModules(data);
+
+
+    }
+    catch(error){
+
+      console.log(error);
 
     }
 
-
-
-    try {
-
-      setUploading(true);
-      setMessage("");
-
-
-
-      const fileName =
-        `${Date.now()}-${file.name}`;
-
-
-
-      const { error: uploadError } =
-        await supabase.storage
-          .from("results")
-          .upload(fileName, file);
-
-
-
-      if (uploadError) {
-
-        throw uploadError;
-
-      }
-
-
-
-
-      const {
-        data
-      } = supabase.storage
-        .from("results")
-        .getPublicUrl(fileName);
-
-
-
-      const fileUrl = data.publicUrl;
-
-
-
-
-
-      const res = await fetch(
-        "/api/lecturer/results",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify({
-
-            title,
-
-            description,
-
-            fileName: file.name,
-
-            fileUrl
-
-          })
-
-        }
-      );
-
-
-
-
-
-      const result = await res.json();
-
-
-
-
-      if (!res.ok) {
-
-        throw new Error(
-          result.error
-        );
-
-      }
-
-
-
-
-      setMessage(
-        "✅ Result published successfully!"
-      );
-
-
-      setTitle("");
-      setDescription("");
-      setFile(null);
-
-
-
-
-    } catch(error) {
-
-      console.error(error);
-
-
-      setMessage(
-        "❌ Failed to publish result."
-      );
-
-
-    } finally {
-
-      setUploading(false);
-
-    }
 
   };
 
@@ -155,129 +86,326 @@ export default function PublishResultsPage() {
 
 
 
+
+
+
+  const filteredModules =
+    modules.filter((item)=>
+
+      item.year === year &&
+      item.semester === semester
+
+    );
+
+
+
+
+
+
+
+
+  const handleUpload = async()=>{
+
+
+    setMessage("");
+
+    setError("");
+
+
+
+    if(!file){
+
+      setError("Please select a CSV file");
+
+      return;
+
+    }
+
+
+
+
+    if(!year || !semester || !module || !assessment){
+
+
+      setError(
+        "Please complete all fields before uploading"
+      );
+
+      return;
+
+    }
+
+
+
+
+
+
+    const formData = new FormData();
+
+
+    formData.append("file",file);
+
+    formData.append("year",year);
+
+    formData.append("semester",semester);
+
+    formData.append("module",module);
+
+    formData.append("assessment",assessment);
+
+
+
+
+
+
+    try{
+
+
+      setLoading(true);
+
+
+
+      const res = await fetch(
+
+        "/api/lecturer/results",
+
+        {
+
+          method:"POST",
+
+          body:formData
+
+        }
+
+      );
+
+
+
+      const data = await res.json();
+
+
+
+
+
+      if(res.ok){
+
+
+        setMessage(
+          "Results uploaded successfully"
+        );
+
+
+        setFile(null);
+
+        setModule("");
+
+        setAssessment("");
+
+
+
+      }
+      else{
+
+
+        setError(
+          data.message || "Upload failed"
+        );
+
+
+      }
+
+
+
+    }
+    catch(error){
+
+
+      setError(
+        "Something went wrong"
+      );
+
+
+    }
+    finally{
+
+
+      setLoading(false);
+
+
+    }
+
+
+  };
+
+
+
+
+
+
+
+
+
   return (
 
-    <main
-      className="
-        min-h-screen
-        bg-gradient-to-br
-        from-gray-950
-        via-gray-900
-        to-gray-950
-        text-white
-        px-3
-        sm:px-6
-        py-6
-        sm:py-10
-      "
-    >
 
 
-      <div
-        className="
-          max-w-3xl
-          mx-auto
-          w-full
-        "
-      >
-
-
-        <button
-
-          onClick={() => router.back()}
-
-          className="
-            mb-6
-            flex
-            items-center
-            gap-2
-            bg-gray-800
-            hover:bg-gray-700
-            px-4
-            py-2
-            rounded-xl
-            text-sm
-            transition
-            shadow-lg
-          "
-
-        >
-
-          ← Back
-
-        </button>
+    <main className="
+      min-h-screen
+      bg-gradient-to-br
+      from-gray-950
+      via-gray-900
+      to-gray-950
+      text-white
+      p-6
+      md:p-10
+    ">
 
 
 
+
+      <div className="
+        max-w-5xl
+        mx-auto
+      ">
+
+
+
+
+
+        {/* HEADER */}
 
 
         <motion.div
 
-          initial={{
-            opacity:0,
-            y:30
-          }}
+          initial={{opacity:0,y:-20}}
 
-          animate={{
-            opacity:1,
-            y:0
-          }}
-
-          transition={{
-            duration:0.5
-          }}
+          animate={{opacity:1,y:0}}
 
           className="
-            bg-gray-900
-            border
-            border-gray-800
+            bg-gradient-to-r
+            from-blue-600
+            to-cyan-500
             rounded-3xl
-            shadow-2xl
-            overflow-hidden
-            w-full
+            p-6
+            md:p-8
+            shadow-xl
+            mb-8
           "
 
         >
 
 
+          <div className="flex items-center gap-3">
+
+            <GraduationCap size={40}/>
 
 
-          <div
-            className="
-              bg-gradient-to-r
-              from-blue-600
-              to-cyan-500
-              px-5
-              sm:px-8
-              py-6
-              sm:py-7
-            "
-          >
+            <div>
 
-            <h1
-              className="
-                text-2xl
-                sm:text-3xl
+              <h1 className="
+                text-3xl
                 font-bold
-              "
-            >
+              ">
 
-              📄 Publish Results
+                Upload Student Results
 
-            </h1>
+              </h1>
 
 
-            <p
-              className="
-                mt-2
+              <p className="
                 text-blue-100
-                text-sm
-              "
-            >
+                mt-2
+              ">
 
-              Upload student results in PDF or Word format.
+                Upload CAT and examination marks using CSV files.
 
-            </p>
+              </p>
+
+
+            </div>
+
+
+          </div>
+
+
+        </motion.div>
+
+
+
+
+
+
+
+
+
+        <div className="
+          grid
+          md:grid-cols-3
+          gap-6
+        ">
+
+
+
+
+
+          {/* INFORMATION CARD */}
+
+
+          <div className="
+            bg-gray-900
+            border
+            border-gray-800
+            rounded-3xl
+            p-6
+          ">
+
+
+            <BookOpen
+              className="mb-4 text-blue-400"
+              size={35}
+            />
+
+
+            <h2 className="
+              font-bold
+              text-xl
+            ">
+
+              Instructions
+
+            </h2>
+
+
+
+            <ul className="
+              text-gray-400
+              mt-4
+              space-y-3
+              text-sm
+            ">
+
+              <li>
+                ✓ Select academic year
+              </li>
+
+              <li>
+                ✓ Select semester
+              </li>
+
+              <li>
+                ✓ Choose module
+              </li>
+
+              <li>
+                ✓ Upload CSV file
+              </li>
+
+              <li>
+                ✓ Emails must be Cavendish students
+              </li>
+
+
+            </ul>
 
 
           </div>
@@ -286,114 +414,168 @@ export default function PublishResultsPage() {
 
 
 
-          <div
-            className="
-              p-5
-              sm:p-8
-            "
-          >
-
-
-          <form
-            onSubmit={handleSubmit}
-            className="
-              space-y-5
-              sm:space-y-6
-            "
-          >
 
 
 
-            <div>
 
-              <label
+
+          {/* FORM */}
+
+
+
+          <div className="
+            md:col-span-2
+            bg-gray-900
+            border
+            border-gray-800
+            rounded-3xl
+            p-6
+            shadow-xl
+          ">
+
+
+
+
+
+            {
+              message && (
+
+                <div className="
+                  bg-green-600/20
+                  border
+                  border-green-500
+                  p-3
+                  rounded-xl
+                  mb-5
+                  text-green-300
+                ">
+
+                  {message}
+
+                </div>
+
+              )
+            }
+
+
+
+
+
+
+            {
+              error && (
+
+                <div className="
+                  bg-red-600/20
+                  border
+                  border-red-500
+                  p-3
+                  rounded-xl
+                  mb-5
+                  text-red-300
+                ">
+
+                  {error}
+
+                </div>
+
+              )
+            }
+
+
+
+
+
+
+
+
+
+            <div className="
+              grid
+              md:grid-cols-2
+              gap-4
+            ">
+
+
+
+              <select
+                value={year}
+                onChange={(e)=>{
+                  setYear(e.target.value);
+                  setModule("");
+                }}
                 className="
-                  block
-                  text-sm
-                  text-gray-300
-                  mb-2
+                bg-gray-800
+                border
+                border-gray-700
+                rounded-xl
+                p-3
                 "
               >
-                Result Title
-              </label>
+
+                <option value="">
+                  Select Year
+                </option>
+
+                <option>
+                  Year 1
+                </option>
+
+                <option>
+                  Year 2
+                </option>
+
+                <option>
+                  Year 3
+                </option>
+
+                <option>
+                  Year 4
+                </option>
 
 
-              <input
+              </select>
 
-                type="text"
 
-                placeholder="Example: Semester 1 Results"
 
-                value={title}
 
-                onChange={(e)=>
-                  setTitle(e.target.value)
-                }
 
-                required
+
+              <select
+
+                value={semester}
+
+                onChange={(e)=>{
+                  setSemester(e.target.value);
+                  setModule("");
+                }}
 
                 className="
-                  w-full
-                  bg-gray-800
-                  border
-                  border-gray-700
-                  focus:border-blue-500
-                  rounded-xl
-                  px-3
-                  sm:px-4
-                  py-3
-                  text-sm
-                  sm:text-base
-                  outline-none
-                  transition
+                bg-gray-800
+                border
+                border-gray-700
+                rounded-xl
+                p-3
                 "
 
-              />
-
-            </div>            <div>
-
-              <label
-                className="
-                  block
-                  text-sm
-                  text-gray-300
-                  mb-2
-                "
               >
-                Description
-              </label>
+
+                <option value="">
+                  Select Semester
+                </option>
+
+                <option>
+                  Semester 1
+                </option>
+
+                <option>
+                  Semester 2
+                </option>
 
 
+              </select>
 
-              <textarea
 
-                placeholder="Add information about these results..."
-
-                value={description}
-
-                onChange={(e)=>
-                  setDescription(e.target.value)
-                }
-
-                className="
-                  w-full
-                  bg-gray-800
-                  border
-                  border-gray-700
-                  focus:border-blue-500
-                  rounded-xl
-                  px-3
-                  sm:px-4
-                  py-3
-                  min-h-[100px]
-                  sm:min-h-[120px]
-                  text-sm
-                  sm:text-base
-                  outline-none
-                  transition
-                "
-
-              />
 
             </div>
 
@@ -402,46 +584,146 @@ export default function PublishResultsPage() {
 
 
 
-            <div>
-
-              <label
-                className="
-                  block
-                  text-sm
-                  text-gray-300
-                  mb-2
-                "
-              >
-                Upload Result File
-              </label>
 
 
 
+            <select
 
-              <div
-                className="
-                  bg-gray-800/50
-                  border-2
-                  border-dashed
-                  border-gray-700
-                  hover:border-blue-500
-                  rounded-2xl
-                  p-4
-                  sm:p-6
-                  transition
-                "
-              >
+              value={module}
+
+              onChange={(e)=>setModule(e.target.value)}
+
+              className="
+              w-full
+              bg-gray-800
+              border
+              border-gray-700
+              rounded-xl
+              p-3
+              mt-4
+              "
+
+            >
+
+              <option value="">
+                Select Module
+              </option>
+
+
+              {
+                filteredModules.map((item)=>(
+
+                  <option
+                    key={item.id}
+                    value={item.name}
+                  >
+
+                    {item.name}
+
+                  </option>
+
+                ))
+              }
+
+
+            </select>
+
+
+
+
+
+
+
+
+
+
+            <select
+
+              value={assessment}
+
+              onChange={(e)=>setAssessment(e.target.value)}
+
+              className="
+              w-full
+              bg-gray-800
+              border
+              border-gray-700
+              rounded-xl
+              p-3
+              mt-4
+              "
+
+            >
+
+              <option value="">
+                Select Assessment
+              </option>
+
+              <option>
+                CAT 1
+              </option>
+
+              <option>
+                CAT 2
+              </option>
+
+              <option>
+                Final Exam
+              </option>
+
+
+            </select>
+
+
+
+
+
+
+
+
+
+
+            <div className="
+              mt-5
+              bg-gray-800
+              rounded-xl
+              p-4
+            ">
+
+
+              <label className="
+                flex
+                items-center
+                gap-3
+                cursor-pointer
+              ">
+
+
+                <FileSpreadsheet
+                  className="text-green-400"
+                />
+
+
+                <span>
+
+                  {
+                    file
+                    ?
+                    file.name
+                    :
+                    "Choose CSV file"
+                  }
+
+                </span>
 
 
                 <input
 
                   type="file"
 
-                  accept="
-                    application/pdf,
-                    .doc,
-                    .docx
-                  "
+                  accept=".csv"
+
+                  hidden
 
                   onChange={(e)=>
                     setFile(
@@ -449,108 +731,14 @@ export default function PublishResultsPage() {
                     )
                   }
 
-                  className="
-                    w-full
-                    text-xs
-                    sm:text-sm
-                    text-gray-300
-                    cursor-pointer
-                  "
-
                 />
 
 
-
-                <p
-                  className="
-                    mt-3
-                    text-xs
-                    text-gray-500
-                  "
-                >
-
-                  Supported files: PDF, DOC, DOCX
-
-                </p>
-
-
-              </div>
+              </label>
 
 
             </div>
 
-
-
-
-
-
-
-            {file && (
-
-              <div
-                className="
-                  flex
-                  items-start
-                  gap-3
-                  bg-gray-800
-                  border
-                  border-gray-700
-                  rounded-xl
-                  p-3
-                  sm:p-4
-                "
-              >
-
-                <div
-                  className="
-                    text-xl
-                    sm:text-2xl
-                  "
-                >
-
-                  📎
-
-                </div>
-
-
-
-                <div
-                  className="
-                    min-w-0
-                  "
-                >
-
-                  <p
-                    className="
-                      text-xs
-                      text-gray-400
-                    "
-                  >
-
-                    Selected File
-
-                  </p>
-
-
-                  <p
-                    className="
-                      text-sm
-                      text-blue-400
-                      break-all
-                    "
-                  >
-
-                    {file.name}
-
-                  </p>
-
-
-                </div>
-
-
-              </div>
-
-            )}
 
 
 
@@ -562,28 +750,37 @@ export default function PublishResultsPage() {
 
             <button
 
-              disabled={uploading}
+              onClick={handleUpload}
+
+              disabled={loading}
 
               className="
-                w-full
-                bg-blue-600
-                hover:bg-blue-700
-                disabled:bg-gray-600
-                py-3
-                sm:py-3.5
-                rounded-xl
-                font-semibold
-                text-sm
-                sm:text-base
-                shadow-lg
-                transition
+              mt-6
+              w-full
+              bg-blue-600
+              hover:bg-blue-700
+              disabled:bg-gray-700
+              py-3
+              rounded-xl
+              font-semibold
+              flex
+              justify-center
+              items-center
+              gap-2
+              transition
               "
 
             >
 
-              {uploading
-                ? "Uploading Results..."
-                : "Publish Results"
+              <Upload size={20}/>
+
+
+              {
+                loading
+                ?
+                "Uploading..."
+                :
+                "Upload Results"
               }
 
 
@@ -593,54 +790,13 @@ export default function PublishResultsPage() {
 
 
 
-          </form>
-
-
-
-
-
-
-
-
-          {message && (
-
-            <div
-
-              className={`
-                mt-5
-                sm:mt-6
-                text-center
-                rounded-xl
-                py-3
-                px-3
-                text-sm
-
-                ${
-                  message.includes("success")
-                  ? "bg-green-900 text-green-300"
-                  : "bg-red-900 text-red-300"
-                }
-
-              `}
-
-            >
-
-              {message}
-
-
-            </div>
-
-          )}
-
-
+          </div>
 
 
 
         </div>
 
 
-
-        </motion.div>
 
 
 
@@ -650,6 +806,8 @@ export default function PublishResultsPage() {
 
     </main>
 
+
   );
+
 
 }
