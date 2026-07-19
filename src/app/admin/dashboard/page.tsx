@@ -1,234 +1,847 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion, Variants } from "framer-motion";
+
 import {
-  BarChart3,
   Users,
-  FileText,
-  Settings,
-  CheckCircle,
-  AlertCircle,
-  UserPlus,
+  GraduationCap,
+  BookOpen,
+  Database,
+  Activity,
+  ClipboardList,
   LogOut,
-} from 'lucide-react';
-import { motion, Variants } from 'framer-motion';
+  UserPlus,
+  FileText,
+  BarChart3,
+  Settings,
+  ShieldCheck,
+  KeyRound,
+  Megaphone,
+} from "lucide-react";
 
-/* ==========================
-   Framer Motion Variants
-========================== */
+
+
 const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.15 } },
+
+  hidden:{
+    opacity:0
+  },
+
+  show:{
+    opacity:1,
+    transition:{
+      staggerChildren:0.15
+    }
+  }
+
 };
+
+
 
 const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 120, damping: 12 } },
-};
 
-const buttonVariants: Variants = {
-  hover: {
-    scale: 1.05,
-    backgroundColor: '#4B5563',
-    transition: { type: 'spring', stiffness: 300 },
+  hidden:{
+    opacity:0,
+    y:20
   },
-  tap: { scale: 0.95 },
+
+  show:{
+    opacity:1,
+    y:0
+  }
+
 };
 
-/* ==========================
-   StatCard Component
-========================== */
+
+
+
+
 interface StatCardProps {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  value: number | string;
+
+  title:string;
+
+  value:number|string;
+
+  icon:React.ReactNode;
+
 }
 
-const StatCard: React.FC<StatCardProps> = ({ icon, title, subtitle, value }) => (
-  <motion.div
-    variants={cardVariants}
-    whileHover={{ scale: 1.03 }}
-    className="bg-gray-800 hover:bg-gray-700 rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-4 w-full transition text-gray-100"
-  >
-    <div className="flex-shrink-0 p-3 bg-gray-700 rounded-full">{icon}</div>
-    <div className="text-center sm:text-left">
-      <p className="text-sm uppercase tracking-wide text-gray-400">{subtitle}</p>
-      <h2 className="text-2xl sm:text-3xl font-extrabold">{value}</h2>
-      <p className="text-gray-300 mt-1">{title}</p>
-    </div>
-  </motion.div>
+
+
+
+function StatCard({
+ title,
+ value,
+ icon
+}:StatCardProps){
+
+
+return (
+
+<motion.div
+
+variants={cardVariants}
+
+className="
+bg-gray-800
+border
+border-gray-700
+rounded-2xl
+p-5
+shadow-xl
+flex
+items-center
+gap-4
+"
+
+>
+
+
+<div className="
+bg-gray-900
+p-3
+rounded-xl
+">
+
+{icon}
+
+</div>
+
+
+
+<div>
+
+<p className="
+text-gray-400
+text-sm
+">
+
+{title}
+
+</p>
+
+
+<h2 className="
+text-3xl
+font-bold
+text-white
+">
+
+{value}
+
+</h2>
+
+
+</div>
+
+
+
+</motion.div>
+
+
 );
 
-/* ==========================
-   ActionCard Component
-========================== */
-interface ActionCardProps {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  href?: string;
 }
 
-const ActionCard: React.FC<ActionCardProps> = ({ icon, title, subtitle, href }) => {
-  const content = (
-    <motion.div
-      variants={cardVariants}
-      whileHover={{ scale: 1.02 }}
-      className="bg-gray-800 hover:bg-gray-700 rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col items-start gap-3 w-full transition text-gray-100"
-    >
-      <div className="flex items-center gap-3 mb-2">
-        <div className="flex-shrink-0">{icon}</div>
-        <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
-      </div>
-      <p className="text-gray-400 text-sm sm:text-base leading-relaxed">{subtitle}</p>
-    </motion.div>
-  );
 
-  return href ? <Link href={href}>{content}</Link> : content;
-};
 
-/* ==========================
-   AdminDashboard Component
-========================== */
-export default function AdminDashboard() {
-  const [stats, setStats] = useState({
-    totalAssignments: 0,
-    pendingGrading: 0,
-    activeUsers: 0,
-  });
 
-  const router = useRouter();
 
-  useEffect(() => {
-    // Mock fetch stats (replace with real API call)
-    setStats({
-      totalAssignments: 256,
-      pendingGrading: 42,
-      activeUsers: 134,
-    });
-  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    router.push("/login");
-  };
 
-  return (
-    <div className="min-h-screen flex flex-col bg-gray-900 text-gray-100 px-2 sm:px-4 md:px-6 lg:px-8 py-6">
-      {/* Header */}
-      <motion.div
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4"
-        initial={{ opacity: 0, y: -40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-      >
-        <div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-            Admin Dashboard
-          </h1>
-          <p className="text-sm sm:text-md text-gray-400 mt-1">
-            Manage the platform, view stats, and generate reports
-          </p>
-        </div>
-        <motion.button
-          variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
-          onClick={handleLogout}
-          className="flex items-center gap-2 bg-gray-700 px-3 py-2 sm:px-4 sm:py-2 rounded-lg shadow hover:bg-gray-600 transition text-sm sm:text-base"
-        >
-          <LogOut className="h-4 w-4 sm:h-5 sm:w-5" /> Logout
-        </motion.button>
-      </motion.div>
+interface AdminCardProps {
 
-      {/* Quick Stats */}
-      <motion.section
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-      >
-        <StatCard
-          icon={<CheckCircle className="h-10 w-10 sm:h-12 sm:w-12 text-green-400" />}
-          title="Total Assignments"
-          subtitle="Assignments"
-          value={stats.totalAssignments}
-        />
-        <StatCard
-          icon={<AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-orange-400" />}
-          title="Pending Grading"
-          subtitle="Pending"
-          value={stats.pendingGrading}
-        />
-        <StatCard
-          icon={<UserPlus className="h-10 w-10 sm:h-12 sm:w-12 text-blue-400" />}
-          title="Active Users"
-          subtitle="Users"
-          value={stats.activeUsers}
-        />
-      </motion.section>
+title:string;
 
-      {/* Action Cards */}
-      <motion.section
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-      >
-        <ActionCard
-          icon={<BarChart3 className="h-8 w-8 sm:h-10 sm:w-10 text-indigo-400" />}
-          title="Review Dashboard"
-          subtitle="View system statistics, assignments, and grading trends."
-          href="/admin/review"
-        />
-        <ActionCard
-          icon={<FileText className="h-8 w-8 sm:h-10 sm:w-10 text-green-400" />}
-          title="Generate Reports"
-          subtitle="Export data on assignments, grades and system usage."
-          href="/admin/reports"
-        />
-        <ActionCard
-          icon={<Users className="h-8 w-8 sm:h-10 sm:w-10 text-purple-400" />}
-          title="Manage Users"
-          subtitle="Add, edit, or remove students and lecturers."
-          href="/admin/users"
-        />
-        {/* New Add Lectures Card */}
-        <ActionCard
-          icon={<UserPlus className="h-8 w-8 sm:h-10 sm:w-10 text-teal-400" />}
-          title="Add Lectures"
-          subtitle="Add new lecturers to the system through the admin dashboard."
-          href="/admin/add-lecturers"
-        />
-      </motion.section>
+description:string;
 
-      {/* Settings */}
-      <motion.section
-        className="w-full max-w-full sm:max-w-md mb-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-      >
-        <ActionCard
-          icon={<Settings className="h-8 w-8 sm:h-10 sm:w-10 text-orange-400" />}
-          title="Settings"
-          subtitle="Configure system preferences and admin options."
-          href="/admin/settings"
-        />
-      </motion.section>
+href:string;
 
-      {/* Footer */}
-      <motion.footer
-        className="text-center text-gray-500 text-sm mt-8 px-2 sm:px-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        © {new Date().getFullYear()} Cavendish University Zambia
-      </motion.footer>
-    </div>
-  );
+icon:React.ReactNode;
+
+}
+
+
+
+
+function AdminCard({
+
+title,
+
+description,
+
+href,
+
+icon
+
+}:AdminCardProps){
+
+
+
+return (
+
+<Link href={href}>
+
+
+<motion.div
+
+variants={cardVariants}
+
+whileHover={{
+scale:1.03
+}}
+
+className="
+bg-gray-800
+border
+border-gray-700
+rounded-2xl
+p-6
+shadow-xl
+cursor-pointer
+hover:bg-gray-700
+transition
+"
+
+
+>
+
+
+<div className="
+flex
+items-center
+gap-4
+mb-4
+">
+
+
+<div className="
+bg-gray-900
+p-3
+rounded-xl
+">
+
+{icon}
+
+</div>
+
+
+<h2 className="
+font-bold
+text-xl
+">
+
+{title}
+
+</h2>
+
+
+</div>
+
+
+
+<p className="
+text-gray-400
+text-sm
+">
+
+{description}
+
+</p>
+
+
+</motion.div>
+
+
+</Link>
+
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+export default function AdminDashboard(){
+
+
+const router = useRouter();
+
+
+
+const [loading,setLoading]=useState(true);
+
+
+
+const [stats,setStats]=useState({
+
+students:0,
+
+lecturers:0,
+
+modules:0,
+
+results:0,
+
+activeUsers:0,
+
+assignments:0
+
+});
+
+
+
+
+
+
+
+useEffect(()=>{
+
+
+async function loadStats(){
+
+
+try{
+
+
+const res = await fetch(
+"/api/admin/stats"
+);
+
+
+
+const data = await res.json();
+
+
+
+if(res.ok){
+
+
+setStats({
+
+students:data.students ?? 0,
+
+lecturers:data.lecturers ?? 0,
+
+modules:data.modules ?? 0,
+
+results:data.results ?? 0,
+
+activeUsers:data.activeUsers ?? 0,
+
+assignments:data.assignments ?? 0
+
+});
+
+
+}
+
+
+}
+
+catch(error){
+
+console.log(
+"ADMIN STATS ERROR",
+error
+);
+
+}
+
+finally{
+
+setLoading(false);
+
+}
+
+
+}
+
+
+
+loadStats();
+
+
+
+},[]);
+
+
+
+
+
+
+
+function logout(){
+
+
+localStorage.removeItem("user");
+
+router.push("/login");
+
+
+}
+
+
+
+
+
+
+
+
+
+return (
+
+
+<main className="
+min-h-screen
+bg-gray-950
+text-white
+px-4
+sm:px-8
+py-8
+">
+
+
+
+
+
+{/* HEADER */}
+
+
+<motion.div
+
+initial={{
+opacity:0,
+y:-30
+}}
+
+animate={{
+opacity:1,
+y:0
+}}
+
+className="
+flex
+flex-col
+md:flex-row
+justify-between
+gap-5
+mb-10
+"
+
+>
+
+
+<div>
+
+
+<h1 className="
+text-3xl
+sm:text-4xl
+font-bold
+">
+
+System Administrator Dashboard
+
+</h1>
+
+
+<p className="
+text-gray-400
+mt-2
+">
+
+Manage Cavendish University E-learning Platform
+
+</p>
+
+
+</div>
+
+
+
+
+
+<button
+
+onClick={logout}
+
+className="
+flex
+items-center
+gap-2
+bg-red-600
+hover:bg-red-700
+px-5
+py-3
+rounded-xl
+"
+
+>
+
+
+<LogOut size={20}/>
+
+Logout
+
+
+</button>
+
+
+
+</motion.div>
+
+
+
+
+
+
+
+
+
+
+{/* STATISTICS */}
+
+
+<motion.section
+
+variants={containerVariants}
+
+initial="hidden"
+
+animate="show"
+
+className="
+grid
+grid-cols-1
+sm:grid-cols-2
+lg:grid-cols-3
+gap-5
+mb-10
+"
+
+>
+
+
+
+<StatCard
+
+title="Students"
+
+value={
+loading ? "..." : stats.students
+}
+
+icon={
+<GraduationCap className="text-blue-400"/>
+}
+
+/>
+
+
+
+<StatCard
+
+title="Lecturers"
+
+value={
+loading ? "..." : stats.lecturers
+}
+
+icon={
+<Users className="text-green-400"/>
+}
+
+/>
+
+
+
+<StatCard
+
+title="Modules"
+
+value={
+loading ? "..." : stats.modules
+}
+
+icon={
+<BookOpen className="text-purple-400"/>
+}
+
+/>
+
+
+
+<StatCard
+
+title="Results"
+
+value={
+loading ? "..." : stats.results
+}
+
+icon={
+<Database className="text-yellow-400"/>
+}
+
+/>
+
+
+
+<StatCard
+
+title="Active Users"
+
+value={
+loading ? "..." : stats.activeUsers
+}
+
+icon={
+<Activity className="text-cyan-400"/>
+}
+
+/>
+
+
+
+<StatCard
+
+title="Assignments"
+
+value={
+loading ? "..." : stats.assignments
+}
+
+icon={
+<ClipboardList className="text-orange-400"/>
+}
+
+/>
+
+
+
+</motion.section>
+
+
+
+
+
+
+
+
+
+<h2 className="
+text-2xl
+font-bold
+mb-5
+">
+
+Management
+
+</h2>
+
+
+
+
+<motion.section
+
+variants={containerVariants}
+
+initial="hidden"
+
+animate="show"
+
+className="
+grid
+grid-cols-1
+md:grid-cols-2
+lg:grid-cols-3
+gap-6
+"
+
+>
+
+
+
+<AdminCard
+
+title="Manage Lecturers"
+
+description="Add lecturers and manage lecturer accounts."
+
+href="/admin/lecturers"
+
+icon={
+<UserPlus className="text-green-400"/>
+}
+
+/>
+
+
+
+<AdminCard
+
+title="Manage Students"
+
+description="View students and reset passwords."
+
+href="/admin/students"
+
+icon={
+<Users className="text-blue-400"/>
+}
+
+/>
+
+
+
+<AdminCard
+
+title="Manage Modules"
+
+description="Create and manage academic modules."
+
+href="/admin/modules"
+
+icon={
+<BookOpen className="text-purple-400"/>
+}
+
+/>
+
+
+
+<AdminCard
+
+title="Results Monitoring"
+
+description="Monitor uploaded student results."
+
+href="/admin/results"
+
+icon={
+<FileText className="text-yellow-400"/>
+}
+
+/>
+
+
+
+<AdminCard
+
+title="Reports"
+
+description="Generate system reports."
+
+href="/admin/reports"
+
+icon={
+<BarChart3 className="text-indigo-400"/>
+}
+
+/>
+
+
+
+<AdminCard
+
+title="Announcements"
+
+description="Manage system announcements."
+
+href="/admin/announcements"
+
+icon={
+<Megaphone className="text-pink-400"/>
+}
+
+/>
+
+
+
+<AdminCard
+
+title="Password Reset"
+
+description="Reset user passwords."
+
+href="/admin/passwords"
+
+icon={
+<KeyRound className="text-red-400"/>
+}
+
+/>
+
+
+
+<AdminCard
+
+title="Security"
+
+description="Manage security settings."
+
+href="/admin/security"
+
+icon={
+<ShieldCheck className="text-green-400"/>
+}
+
+/>
+
+
+
+<AdminCard
+
+title="Settings"
+
+description="Configure platform settings."
+
+href="/admin/settings"
+
+icon={
+<Settings className="text-gray-300"/>
+}
+
+/>
+
+
+
+</motion.section>
+
+
+
+
+
+
+
+
+<footer className="
+text-center
+text-gray-500
+mt-12
+">
+
+© {new Date().getFullYear()} Cavendish University Zambia E-Learning System
+
+</footer>
+
+
+
+</main>
+
+
+);
+
+
 }

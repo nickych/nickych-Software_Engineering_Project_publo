@@ -13,11 +13,12 @@ model User {
   email           String   @unique
   password        String
   role            String
-  course          String?
+  courseId        Int?
   profileImage    String?
   profileImageUrl String?
   createdAt       DateTime @default(now())
   results         Result[]
+  Course          Course?  @relation(fields: [courseId], references: [id])
 }
 
 model Lecturer {
@@ -101,4 +102,11 @@ model Module {
   year      String
   semester  String
   createdAt DateTime @default(now())
+}
+
+model Course {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  User      User[]
 }
