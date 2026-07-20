@@ -1,258 +1,108 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
-
-
-export async function POST(req: Request) {
-
-  try {
-
-    const { email, password } = await req.json();
-
-
-    if (!email || !password) {
-
-      return NextResponse.json(
-        {
-          error: "Missing email or password"
-        },
-        {
-          status:400
-        }
-      );
-
-    }
-
-
-
-    // STUDENT LOGIN
-
-    const student = await prisma.user.findUnique({
-
-      where:{
-        email
-      },
-
-      include:{
-        course:true
-      }
-
-    });
-
-
-
-    if(student){
-
-
-      const valid =
-        await bcrypt.compare(
-          password,
-          student.password
-        );
-
-
-      if(!valid){
-
-        return NextResponse.json(
-          {
-            error:"Invalid password"
-          },
-          {
-            status:401
-          }
-        );
-
-      }
-
-
-
-      return NextResponse.json({
-
-        user:{
-
-          id:student.id,
-
-          name:student.name,
-
-          email:student.email,
-
-          role:"student",
-
-          course:
-            student.course?.name || null
-
-        }
-
-      });
-
-
-    }
-
-
-
-
-
-
-    // LECTURER LOGIN
-
-    const lecturer =
-      await prisma.lecturer.findUnique({
-
-        where:{
-          email
-        }
-
-      });
-
-
-
-    if(lecturer){
-
-
-      const valid =
-        await bcrypt.compare(
-          password,
-          lecturer.password
-        );
-
-
-      if(!valid){
-
-        return NextResponse.json(
-          {
-            error:"Invalid password"
-          },
-          {
-            status:401
-          }
-        );
-
-      }
-
-
-
-      return NextResponse.json({
-
-        user:{
-
-          id:lecturer.id,
-
-          name:lecturer.name,
-
-          email:lecturer.email,
-
-          role:"lecturer"
-
-        }
-
-      });
-
-
-    }
-
-
-
-
-
-
-
-    // ADMIN LOGIN
-
-    const admin =
-      await prisma.admin.findUnique({
-
-        where:{
-          email
-        }
-
-      });
-
-
-
-    if(admin){
-
-
-      const valid =
-        await bcrypt.compare(
-          password,
-          admin.password
-        );
-
-
-
-      if(!valid){
-
-        return NextResponse.json(
-          {
-            error:"Invalid password"
-          },
-          {
-            status:401
-          }
-        );
-
-      }
-
-
-
-      return NextResponse.json({
-
-        user:{
-
-          id:admin.id,
-
-          name:admin.name,
-
-          email:admin.email,
-
-          role:"admin"
-
-        }
-
-      });
-
-
-    }
-
-
-
-
-
-
-    return NextResponse.json(
-      {
-        error:"Account not found"
-      },
-      {
-        status:401
-      }
-    );
-
-
-
-  }
-
-  catch(error){
-
-
-    console.error(
-      "LOGIN ERROR:",
-      error
-    );
-
-
-    return NextResponse.json(
-      {
-        error:"Server error"
-      },
-      {
-        status:500
-      }
-    );
-
-
-  }
-
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int      @id @default(autoincrement())
+  name            String?
+  email           String   @unique
+  password        String
+  role            String
+  course          String?
+  profileImage    String?
+  profileImageUrl String?
+  createdAt       DateTime @default(now())
+
+  results Result[]
+}
+
+model Lecturer {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+  role     String @default("lecturer")
+
+  announcements Announcement[] @relation("LecturerAnnouncements")
+}
+
+model Admin {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+  role     String @default("admin")
+}
+
+model Announcement {
+  id         Int      @id @default(autoincrement())
+  title      String
+  content    String
+  lecturerId Int
+  createdAt  DateTime @default(now())
+
+  lecturer Lecturer @relation("LecturerAnnouncements", fields: [lecturerId], references: [id])
+}
+
+model Book {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  course      String
+  semester    String
+  fileUrl     String
+  lecturerId  Int
+  createdAt   DateTime @default(now())
+}
+
+model AssignmentSubmission {
+  id          Int      @id @default(autoincrement())
+  title       String
+  studentId   String
+  fileUrl     String
+  fileName    String
+  grade       String?
+  feedback    String?
+  submittedAt DateTime @default(now())
+}
+
+model Assignment {
+  id        Int      @id @default(autoincrement())
+  title     String
+  studentId String
+  fileUrl   String
+  createdAt DateTime @default(now())
+}
+
+model Result {
+  id           Int      @id @default(autoincrement())
+  studentEmail String
+  module       String
+  year         String
+  semester     String
+  cat1         Float?
+  cat2         Float?
+  finalExam    Float?
+  total        Float?
+  grade        String?
+  status       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  student User @relation(fields: [studentEmail], references: [email], onDelete: Cascade)
+
+  @@unique([studentEmail, module, semester])
+}
+
+model Module {
+  id        Int      @id @default(autoincrement())
+  name      String
+  year      String
+  semester  String
+  createdAt DateTime @default(now())
 }
